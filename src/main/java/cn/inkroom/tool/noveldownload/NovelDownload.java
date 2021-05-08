@@ -33,7 +33,7 @@ public abstract class NovelDownload {
 
                 System.out.println("正在加载  " + url);
                 return Jsoup.parse(new URL(url), timeout);
-            } catch (SSLProtocolException | SocketTimeoutException  e) {
+            } catch (SSLProtocolException | SocketTimeoutException e) {
                 //增加超时时间继续
                 timeout += 3000;
                 System.out.println("加载 " + url + " 超时 ，时间设定为=" + timeout);
@@ -71,15 +71,18 @@ public abstract class NovelDownload {
         this.firstUrl = firstUrl;
     }
 
+
     public boolean download() {
 
         String url = this.firstUrl;
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
 
 
-            StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
-            do {
+        do {
+
+            // 每一章写入一次
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));) {
 
                 Document document = getDocument(url);
                 //获取标题
@@ -93,8 +96,6 @@ public abstract class NovelDownload {
                 //获取内容
                 builder.append(getContent(document));
 
-                //判断是下一页，还是下一章
-
                 while (true) {
                     String nextUrl = getNextUrl(document);
 
@@ -102,6 +103,7 @@ public abstract class NovelDownload {
                         url = null;
                         break;
                     }
+                    //判断是下一页，还是下一章
                     if (hasMorPage(nextUrl)) {//还有下一页
                         document = getDocument(nextUrl);
                         builder.append(getContent(document));
@@ -109,33 +111,31 @@ public abstract class NovelDownload {
                         url = nextUrl;
                         break;
                     }
-
                 }
-
                 writer.write(builder.toString());
                 writer.newLine();
-                builder.delete(0, builder.length() - 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+
+            builder.delete(0, builder.length() - 1);
 
 
+        } while (url != null);
 
-            } while (url != null);
+        return true;
 
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
 
     }
 
     /**
-     *
      * 对于部分网站会对一章的内容进行分页，这里用来判断当前章是否已经下载完成，同时标题应该去掉可能存在的页码字样
      *
      * @param nextUrl 下一章或者下一页的url
      * @return
      */
-    public boolean hasMorPage(String nextUrl){
+    public boolean hasMorPage(String nextUrl) {
         return nextUrl.matches(".*_[1-9]\\.html$");
     }
 

@@ -113,7 +113,7 @@ public class NovelDownloadApplication {
         List<DownloadBean> downloadBeans = JSONObject.parseArray(builder.toString(), DownloadBean.class);
 
 
-        for (int i = 0; i < downloadBeans.size(); i++) {
+        for (int i = downloadBeans.size() - 1; i < downloadBeans.size(); i++) {
             //加载对应的下载器
             try {
                 System.out.println("cn.inkroom.tool.noveldownload." + downloadBeans.get(i).getDownloader() + ".Download");
@@ -126,7 +126,8 @@ public class NovelDownloadApplication {
                 try {
                     d.download();
                 } catch (Exception e) {
-                    System.out.println(downloadBeans.get(i).getFile()+" 下载失败");
+                    System.out.println(downloadBeans.get(i).getFile() + " 下载失败");
+                    e.printStackTrace();
                 }
 
             } catch (ClassNotFoundException e) {
