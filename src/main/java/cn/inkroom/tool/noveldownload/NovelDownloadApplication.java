@@ -122,6 +122,7 @@ public class NovelDownloadApplication {
 
                 d.setFirstUrl(downloadBeans.get(i).getFirstUrl());
                 d.setFile(new File(downloadBeans.get(i).getFile()));
+                d.setTop(downloadBeans.get(i).getTop());
 
                 try {
                     d.download();

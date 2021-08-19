@@ -4,8 +4,15 @@ public class DownloadBean {
     private String firstUrl;
     private String file;
     private String downloader;
+    private String top;
 
+    public String getTop() {
+        return top;
+    }
 
+    public void setTop(String top) {
+        this.top = top;
+    }
 
     public String getFirstUrl() {
         return firstUrl;

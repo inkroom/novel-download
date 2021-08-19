@@ -23,9 +23,27 @@ public abstract class NovelDownload {
 
     private String firstUrl;
 
+    protected String url;
+
+    private String name;
+
+    /**
+     * 设置目录
+     * @param url
+     */
+    public void setTop(String url){}
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public Document getDocument(String url) throws IOException {
         int timeout = 3000;
-
+        this.url = url;
         while (true) {
             try {
                 //睡眠一下
@@ -33,7 +51,7 @@ public abstract class NovelDownload {
 
                 System.out.println("正在加载  " + url);
                 return Jsoup.parse(new URL(url), timeout);
-            } catch (SSLProtocolException | SocketTimeoutException e) {
+            } catch ( IOException e) {
                 //增加超时时间继续
                 timeout += 3000;
                 System.out.println("加载 " + url + " 超时 ，时间设定为=" + timeout);
@@ -78,11 +96,11 @@ public abstract class NovelDownload {
 
 
         StringBuilder builder = new StringBuilder();
+        // 每一章写入一次
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file));) {
 
-        do {
+            do {
 
-            // 每一章写入一次
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true));) {
 
                 Document document = getDocument(url);
                 //获取标题
@@ -114,15 +132,15 @@ public abstract class NovelDownload {
                 }
                 writer.write(builder.toString());
                 writer.newLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
-
-            builder.delete(0, builder.length() - 1);
+                writer.flush();//刷新到文件
+                builder.delete(0, builder.length());
 
 
-        } while (url != null);
+            } while (url != null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
 
         return true;
 
